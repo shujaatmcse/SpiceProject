@@ -27,24 +27,8 @@ namespace Spice.Areas.Admin.Controllers
             return View(await applicationDbContext.ToListAsync());
         }
 
-        // GET: Admin/SubCategories/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var subCategory = await _context.SubCategories
-                .Include(s => s.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (subCategory == null)
-            {
-                return NotFound();
-            }
-
-            return View(subCategory);
-        }
+     
+    
 
         // GET: Admin/SubCategories/Create
         public IActionResult Create()

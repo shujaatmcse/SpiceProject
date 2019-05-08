@@ -27,6 +27,34 @@ namespace Spice.Areas.Admin.Controllers
             return View(await applicationDbContext.ToListAsync());
         }
 
+       
+        public JsonResult MyAjaxAction()
+        {
+            return Json("this is my test");
+        }
+
+     
+        //Get Sub Categories for Main Category, return json for page
+        //[ActionName("GetSubCategories")]
+        
+        public/* JsonResult*/ async Task<IActionResult> GetSubCategories(int? CategoryIdInController)
+        {
+            if (CategoryIdInController == null)
+            {
+                return NotFound();
+            }
+
+  
+
+            var subCategory = await _context.SubCategories
+                .Include(s => s.Category).Where(c=>c.CategoryId== CategoryIdInController).ToListAsync();
+            if (subCategory == null)
+            {
+                return NotFound();
+            }
+
+            return Json(new SelectList(subCategory, "Id", "Name"));
+        }
         // GET: Admin/MenuItems/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -51,7 +79,7 @@ namespace Spice.Areas.Admin.Controllers
         public IActionResult Create()
         {
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
-            ViewData["SubCategoryId"] = new SelectList(_context.SubCategories, "Id", "Name");
+            //ViewData["SubCategoryId"] = new SelectList(_context.SubCategories, "Id", "Name");
             return View();
         }
 
