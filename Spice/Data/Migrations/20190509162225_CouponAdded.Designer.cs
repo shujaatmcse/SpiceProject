@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Spice.Data;
 
 namespace Spice.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190509162225_CouponAdded")]
+    partial class CouponAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,31 +198,6 @@ namespace Spice.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Spice.Models.Coupon", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("CoupnType")
-                        .IsRequired();
-
-                    b.Property<double>("Discount");
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<double>("MinimumAmount");
-
-                    b.Property<string>("Name")
-                        .IsRequired();
-
-                    b.Property<byte[]>("Picture");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Coupon");
                 });
 
             modelBuilder.Entity("Spice.Models.MenuItem", b =>
