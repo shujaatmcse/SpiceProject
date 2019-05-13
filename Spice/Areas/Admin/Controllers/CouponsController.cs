@@ -56,6 +56,7 @@ namespace Spice.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        //Reciving of the method is default such as Bind, Model etc
         public async Task<IActionResult> Create([Bind("Id,Name,CoupnType,Discount,MinimumAmount,Picture,IsActive")] Coupon coupon)
         {//If Model state is Valid
             if (ModelState.IsValid)

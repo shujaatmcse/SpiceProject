@@ -1,8 +1,69 @@
-﻿@{
+﻿@model Spice.ViewModel.LandingPageViewModel
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
+@*Note you are calling here the count Method, so make sure you type it as ..Count()>0, with braces*@
+@if (Model.Coupon.ToList().Count() > 0)
+{
+    <div class="border">
+        @*the data interval determine how quickly the copon should be displayed.*@
+        <div class="carousel" data-ride="carousel" data-interval="1000">
+
+            @for (int i = 0; i < Model.Coupon.Count(); i++)
+            {
+                if (i == 0)
+                {
+                    <div class="carousel-item active">
+                        @{
+                            var base64 = Convert.ToBase64String(Model.Coupon.ToList()[0].Picture);
+                            var imgsrc = string.Format("data:image/jpg;base64,{0}", base64);
+                        }
+                        @*Below we are now actually display image.*@
+                        <img src="@imgsrc" height="50" class="d-block w-100" />
+                    </div>
+                }
+                else
+                {// it will displayed when not active.
+                    <div class="carousel-item">
+                        @{
+                            var base64 = Convert.ToBase64String(Model.Coupon.ToList()[i].Picture);
+                            var imgsrc = string.Format("data:image/jpg;base64,{0}", base64);
+                        }
+                        <img src="@imgsrc" height="50" class="d-block w-100" />
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+}
+
+<br>
+<br>
+
+<div class="container">
+    <a asp-action="Index" asp-controller="Home" >Show All</a>
+    @foreach (var item in Model.Category)
+    {
+        <a asp-action="Index" asp-route-id="@item.Id">@item.Name</a>
+    }
+</div>
+
+<div class=" container">
+    @foreach (var menu in Model.MenuItem)
+    {
+
+       <div class=" row">
+           @menu.Description;
+           @menu.Category.Name;
+
+       </div>
+    }
+</div>
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+<br />
