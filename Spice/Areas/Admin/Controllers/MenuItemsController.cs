@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +17,13 @@ namespace Spice.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public MenuItemsController(ApplicationDbContext context)
+        //Step1 in Controller, include the ASP.NETCore hosting enviroment.
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public MenuItemsController(ApplicationDbContext context, IHostingEnvironment hostingEnvironment)
         {
             _context = context;
+            //Step1 in Controller, include the ASP.NETCore hosting enviroment.
+            _hostingEnvironment = hostingEnvironment;
         }
 
         // GET: Admin/MenuItems
@@ -88,17 +94,58 @@ namespace Spice.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Image,Spycness,Price,CategoryId,SubCategoryId")] MenuItem menuItem)
+
+        //Here we are saving file on server not on into DB, th ereceiving is as usual
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,Image,Spycness,Price,CategoryId,SubCategoryId")] MenuItem menu)
         {
+        // If Modle is valid
             if (ModelState.IsValid)
             {
-                _context.Add(menuItem);
+                // lets save the model first to the database.
+                //We made a copy of the object, so when it is saved into DB, it will have the Id assign to it.
+                var newMenuItem = menu;
+                _context.Add(newMenuItem);
+                await _context.SaveChangesAsync();
+               
+                // declare the root path ,, wich is www
+                string webRootPath = _hostingEnvironment.WebRootPath;
+                // files variable
+                var files = HttpContext.Request.Form.Files;
+
+                //if user has uploaded file
+                if (files.Count > 0)
+                {
+                    // Creating Path where you want the image to be saved 
+                    var uploads = Path.Combine(webRootPath, @"images\Products");
+                    // Get the extension for it
+                    var extension = Path.GetExtension(files[0].FileName);
+
+                    // Creating the actual file in the specified directory/path  with Model.Id & its extension, you may choose it with diffrent id as you plan
+                    using (var filesStream = new FileStream(Path.Combine(uploads, newMenuItem.Id + extension), FileMode.Create))
+                    {
+                        files[0].CopyTo(filesStream);
+                    }
+                    //Saving Path of the Image into Database
+                    newMenuItem.Image = @"\images\Products" + newMenuItem.Id + extension;
+                }
+                //no file was uploaded, so use default image which is on the server, note the sc is just a path.
+                else
+                {
+                   
+                    var uploads = Path.Combine(webRootPath, @"images\" + SC.DefaultFoodImage);
+                    System.IO.File.Copy(uploads, webRootPath + @"\images\Products" + newMenuItem.Id + ".png");
+
+                    //Saving Path of the Image into Database
+                    newMenuItem.Image = @"\images\Products" + newMenuItem.Id + ".png";
+                }
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", menuItem.CategoryId);
-            ViewData["SubCategoryId"] = new SelectList(_context.SubCategories, "Name", "Name", menuItem.SubCategoryId);
-            return View(menuItem);
+
+            // If Model is not Valid
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", menu.CategoryId);
+            ViewData["SubCategoryId"] = new SelectList(_context.SubCategories, "Name", "Name", menu.SubCategoryId);
+            return View(menu);
         }
 
         // GET: Admin/MenuItems/Edit/5
