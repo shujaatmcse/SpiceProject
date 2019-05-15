@@ -49,9 +49,6 @@ namespace Spice.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-
-  
-
             var subCategory = await _context.SubCategories
                 .Include(s => s.Category).Where(c=>c.CategoryId== CategoryIdInController).ToListAsync();
             if (subCategory == null)
@@ -115,28 +112,33 @@ namespace Spice.Areas.Admin.Controllers
                 //if user has uploaded file
                 if (files.Count > 0)
                 {
-                    // Creating Path where you want the image to be saved 
-                    var uploads = Path.Combine(webRootPath, @"images\Products");
-                    // Get the extension for it
+                    // Creating Path where you want the image to be saved, it will be to root folder wwww 
+                    var path = Path.Combine(webRootPath, @"images\Products\");
+                    // Get the extension of the uploaded file i.e Jpg
                     var extension = Path.GetExtension(files[0].FileName);
 
                     // Creating the actual file in the specified directory/path  with Model.Id & its extension, you may choose it with diffrent id as you plan
-                    using (var filesStream = new FileStream(Path.Combine(uploads, newMenuItem.Id + extension), FileMode.Create))
+                    using (var filesStream = new FileStream(Path.Combine(path, newMenuItem.Id + extension), FileMode.Create))
                     {
+                        //Copying single file
                         files[0].CopyTo(filesStream);
                     }
                     //Saving Path of the Image into Database
-                    newMenuItem.Image = @"\images\Products" + newMenuItem.Id + extension;
+                    newMenuItem.Image = @"\images\Products\" + newMenuItem.Id + extension;
                 }
                 //no file was uploaded, so use default image which is on the server, note the sc is just a path.
                 else
                 {
-                   
-                    var uploads = Path.Combine(webRootPath, @"images\" + SC.DefaultFoodImage);
-                    System.IO.File.Copy(uploads, webRootPath + @"\images\Products" + newMenuItem.Id + ".png");
+                   // This will copy the default file and save it with Id name 
+                    //var uploads = Path.Combine(webRootPath, @"images\" + SC.DefaultFoodImage);
+                    //System.IO.File.Copy(uploads, webRootPath + @"\images\Products\" + newMenuItem.Id + ".png");
 
-                    //Saving Path of the Image into Database
-                    newMenuItem.Image = @"\images\Products" + newMenuItem.Id + ".png";
+                    ////Saving Path of the Image into Database
+                    //newMenuItem.Image = @"\images\Products\" + newMenuItem.Id + ".png";
+
+                    // Instead of copying the default file again and again, you could point to the defualt file once only
+                    // Hence no need to copy
+                    newMenuItem.Image = @"\images\" + SC.DefaultFoodImage;
                 }
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -229,8 +231,31 @@ namespace Spice.Areas.Admin.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var menuItem = await _context.MenuItem.FindAsync(id);
-            _context.MenuItem.Remove(menuItem);
-            await _context.SaveChangesAsync();
+            string webRootPath = _hostingEnvironment.WebRootPath;
+            if (menuItem != null)
+            {
+                //Checking if the MenuItem has a default image/picture or one was uploaded by user.
+                //We do not want to delete the default image on server as this will be used by menuitem 
+                //as default when user does't upload one
+                //Path of the item in Db
+                var menuItemPathInDb = menuItem.Image.ToString().TrimStart('\\');
+                // The default image path on server
+                var pathOnServer = (@"images\" + SC.DefaultFoodImage);
+                // If there both path are not the same then we want to delete the  image
+                // so we only delete the user uploaded image.
+                if (menuItemPathInDb != pathOnServer)
+                {
+                    var imagePath = Path.Combine(webRootPath, menuItemPathInDb);
+
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+                _context.MenuItem.Remove(menuItem);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
             return RedirectToAction(nameof(Index));
         }
 

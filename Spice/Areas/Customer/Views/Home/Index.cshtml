@@ -44,7 +44,7 @@
 <br>
 
 <div class="container">
-    <a asp-action="Index" asp-controller="Home" >Show All</a>
+    <a asp-action="Index" asp-controller="Home">Show All</a>
     @foreach (var item in Model.Category)
     {
         <a asp-action="Index" asp-route-id="@item.Id">@item.Name</a>
@@ -55,15 +55,35 @@
     @foreach (var menu in Model.MenuItem)
     {
 
-       <div class=" row">
-           @menu.Description;
-           @menu.Category.Name;
+        <div class=" row">
+           <p>@Html.Raw(@menu.Description)</p> ;
+            @menu.Category.Name;
 
-       </div>
+        </div>
+        if (menu.Image.Count() > 0)
+        {
+            <div>
+                <img src="@menu.Image" width="600" height="400" style="border-radius:5px;border:1px solid #bbb9b9;" />
+            </div>
+        }
     }
 </div>
+
+
+
+
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 <br />
+
+
+@section Scripts{
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">
+
+    </script>
+}
+          
