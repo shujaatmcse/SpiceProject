@@ -8,5 +8,9 @@ namespace Spice
     public  static class SC
     {
         public const string DefaultFoodImage = "default_food.png";
+        public const string ManagerRole = "ManagerRole";
+        public const string KitchenRole = "KitchenRole";
+        public const string FrontDeskRole = "FrontDeskRole";
+        public const string CustomerRole = "CustomerRole";
     }
 }

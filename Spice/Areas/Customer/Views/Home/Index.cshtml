@@ -39,83 +39,116 @@
     </div>
 
 }
+<br />
+<div class="p-2 m-2"></div>
 
-<br>
-<br>
-
-<br>
-@*Displaying list and options for user selection to select what the want to see which category items*@ 
-<div class="container">
-    <a class="btn btn-success btn-lg" asp-action="Index" asp-controller="Home">Show All</a>
+@*Displaying list and options for user selection to select what the want to see which category items*@
+<div class="container text-center">
+    <a class="btn btn-success btn-lg btn-group myClass" asp-action="Index" asp-route-id="null" asp-controller="Home">Show All</a>
     @foreach (var item in Model.Category)
     {
-        <a class="btn btn-success btn-lg" asp-action="Index" asp-route-id="@item.Id">@item.Name</a>
+        <a class="btn btn-success btn-lg myClass btn-group" asp-action="Index" asp-route-id="@item.Id">@item.Name</a>
     }
 </div>
-<br />
 
+<div class="backgroundWhite container menu-filter-list list-inline text-center" id="myId">
+    <a class="btn-secondary ml-1 mr-1" asp-action="Index" asp-route-id="null" asp-controller="Home">Show All</a>
+    @foreach (var item in Model.Category)
+    {
+        <a class="btn-secondary ml-1 mr-1" asp-action="Index" asp-route-id="@item.Id">@item.Name</a>
+    }
+</div>
+
+
+<br />
+<br />
+<br />
+<div id="msgid">
+</div>
+
+<br />
+<br />
+<br />
 @*Displaying list MenuItems and Its category on the top*@
 
 @foreach (var Cat in Model.Category)
 {
     //This if statement display show only those categories that has products or menuitem
     //If you remove this if statement it will show also those categories with no products/items
-   @if (Model.MenuItem.Where(u => u.Category.Name.Equals(Cat.Name)).Count() > 0)
+    @if (Model.MenuItem.Where(u => u.Category.Name.Equals(Cat.Name)).Count() > 0)
     {
-        //To Display the category name once only, 
-    <h2 class="text-capitalize text-black-50">@Cat.Name </h2>
+        //To Display the category name once only,
+        <h2 class="text-capitalize text-black-50">@Cat.Name </h2>
 
         //Now displaying/looping through thoses menu items where the category name is the same as above
-    @foreach (var item in Model.MenuItem.Where(u => u.Category.Name.Equals(Cat.Name)))
-    {
-        <div class="border border-info rounded col-12" style="margin-bottom:10px; margin-top:10px; padding:10px">
-            <div class="row">
-                <div class="col-md-3 col-sm-12">
-                    <img src="@item.Image" width="99%" style="border-radius:5px;border:1px solid #bbb9b9" />
-                </div>
-                <div class="col-md-9 col-sm-12">
-                    <div class="row pr-3">
-                        <div class="col-8">
-                            <label class="text-primary" style="font-size:21px;color:maroon">@item.Name</label>
-                            @if (item.Spycness == "1")
-                            {
-                                <img srcset="/images/mild.png" title="Mild" />
-                            }
-                            @if (item.Spycness == "2")
-                            {
-                                <img srcset="/images/spicy.png" title="Spicy" />
-                            }
-                            @if (item.Spycness == "3")
-                            {
-                                <img srcset="/images/veryspicy.png" title="Very Spicy" />
-                            }
-                        </div>
-                        <div class="col-4 text-right" style="color:maroon">
-                            <h4>$@item.Price</h4>
-                        </div>
+        @foreach (var item in Model.MenuItem.Where(u => u.Category.Name.Equals(Cat.Name)))
+        {
+            <div class="border border-info rounded col-12" style="margin-bottom:10px; margin-top:10px; padding:10px">
+                <div class="row">
+                    <div class="col-md-3 col-sm-12">
+                        <img src="@item.Image" width="99%" style="border-radius:5px;border:1px solid #bbb9b9" />
                     </div>
-                    <div class="row col-12 text-justify d-none d-md-block">
-                        <p>@Html.Raw(item.Description)</p>
-                    </div>
-                    <div class="col-md-3 col-sm-12 offset-md-9 text-center">
-                        <a asp-action="Details" class="btn btn-success form-control" asp-route-id="@item.Id" asp-controller="MenuItems" asp-area="Admin">Details</a>
+                    <div class="col-md-9 col-sm-12">
+                        <div class="row pr-3">
+                            <div class="col-8">
+                                <label class="text-primary" style="font-size:21px;color:maroon">@item.Name</label>
+                                @*@if (item.Spycness == "1")
+                                    {
+                                        <img srcset="/images/mild.png" title="Mild" />
+                                    }
+                                    @if (item.Spycness == "2")
+                                    {
+                                        <img srcset="/images/spicy.png" title="Spicy" />
+                                    }
+                                    @if (item.Spycness == "3")
+                                    {
+                                        <img srcset="/images/veryspicy.png" title="Very Spicy" />
+                                    }*@
+                            </div>
+                            <div class="col-4 text-right" style="color:maroon">
+                                <h4>$@item.Price</h4>
+                            </div>
+                        </div>
+                        <div class="row col-12 text-justify d-none d-md-block">
+                            <p>@Html.Raw(item.Description)</p>
+                        </div>
+                        <div class="col-md-3 col-sm-12 offset-md-9 text-center">
+                            <a asp-action="Details" class="btn btn-success form-control" asp-route-id="@item.Id" asp-controller="MenuItems" asp-area="Admin">Details</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    }
+        }
 
 
         //Added some padding when each catgory is displayed
-    <div class="p-2"></div>
+        <div class="p-2"></div>
     }
 }
 
-
-@section Scripts{
+@section Scripts
+{
     <script src="https://code.jquery.com/jquery-3.3.1.js"
-            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-            crossorigin="anonymous">
+                integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+                crossorigin="anonymous">
 
+        </script>
+    <script type="text/javascript">
+//$("#myId a").click(function(){ // don't need each (click does this internally)
+//    $(this).addClass('active') //add cell-selected class to a
+//        .siblings
+// .removeClass('active'); //remove the class
+//});
+
+        $(document).ready(function(){
+        $("a").click(function(){
+    $("a").addClass("active");
+  });
+     
+
+       
+        $(document).ready(function(){
+            $("#msgid").html("This is Hello World  from JQuery");
+        });
     </script>
 }
