@@ -1,5 +1,6 @@
 ﻿@page
 @model RegisterModel
+@using Spice.Models;
 @{
     ViewData["Title"] = "Register";
 }
@@ -47,6 +48,15 @@
                 <input asp-for="Input.ConfirmPassword" class="form-control" />
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
+            @if (User.IsInRole(SC.ManagerRole))
+            {
+        <div class="form-group row" >
+            <input type="radio" name="rdRole" value="@SC.ManagerRole" />@SC.ManagerRole
+            <input type="radio" name="rdRole" value="@SC.KitchenRole" />@SC.KitchenRole
+            <input type="radio" name="rdRole" value="@SC.FrontDeskRole" />@SC.FrontDeskRole
+            <input type="radio" name="rdRole" value="@SC.CustomerRole" checked/>@SC.CustomerRole @*defefault selection*@
+        </div>
+            }
             <button type="submit" class="btn btn-primary">Register</button>
         </form>
     </div>

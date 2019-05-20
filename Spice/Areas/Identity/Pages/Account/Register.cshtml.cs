@@ -76,6 +76,8 @@ namespace Spice.Areas.Identity.Pages.Account
    
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            // lets read the radion selection value to know whihc user role has been selected.
+            string userRole = Request.Form["rdRole"].ToString();
             returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {//Code started from here
@@ -109,26 +111,55 @@ namespace Spice.Areas.Identity.Pages.Account
                     {
                         await myRoleManager.CreateAsync(new IdentityRole(SC.KitchenRole));
                     }
-
+                    //Below we add the user to selected roles and the the default is customer.
                     // lets try to add the user to admin rol the first user.
                     //The user is added with password Abc_123
                     //AddtoRole is singular
-                    await _userManager.AddToRoleAsync(user, SC.ManagerRole);
+
+                    if (userRole == SC.ManagerRole)
+                    {
+                        await _userManager.AddToRoleAsync(user, SC.ManagerRole);
+                    }
+                    else if (userRole == SC.FrontDeskRole)
+                    {
+                        await _userManager.AddToRoleAsync(user, SC.FrontDeskRole);
+
+                    }
+                    else if (userRole == SC.KitchenRole)
+                    {
+                        await _userManager.AddToRoleAsync(user, SC.KitchenRole);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, SC.CustomerRole);
+                        // Also we only want to go login the user automatically if it is Customer, so we will bring the sign In statement 
+                        // from below here
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        //It will redirect only the Customer back to the URL
+                        return LocalRedirect(returnUrl);
+                    }
+
+                    //We  want the Admin to go back to user Index Page
+
+                    return RedirectToAction("Index", "User", new { area = "Admin" });
                     //Custome Code Ended here
-                    _logger.LogInformation("User created a new account with password.");
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { userId = user.Id, code = code },
-                        protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    //_logger.LogInformation("User created a new account with password.");
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //var callbackUrl = Url.Page(
+                    //    "/Account/ConfirmEmail",
+                    //    pageHandler: null,
+                    //    values: new { userId = user.Id, code = code },
+                    //    protocol: Request.Scheme);
+
+                    //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    // This method is moved up
+                    //await _signInManager.SignInAsync(user, isPersistent: false);
+                    //return LocalRedirect(returnUrl);
+
                 }
                 foreach (var error in result.Errors)
                 {

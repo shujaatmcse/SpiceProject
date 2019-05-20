@@ -36,7 +36,8 @@ namespace Spice.Areas.Identity.Pages.Account
             }
             else
             {
-                return Page();
+                //return Page();
+                return RedirectToPage("Logout");
             }
         }
     }
