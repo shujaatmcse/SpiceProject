@@ -4,9 +4,11 @@ using Spice.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Spice.Areas.Admin.Controllers
 {
+    [Authorize(Roles = SC.ManagerRole)]
     [Area("Admin")]
     public class HomeController : Controller
     {
