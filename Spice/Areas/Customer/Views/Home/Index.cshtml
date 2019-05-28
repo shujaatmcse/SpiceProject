@@ -113,14 +113,12 @@
                             <p>@Html.Raw(item.Description)</p>
                         </div>
                         <div class="col-md-3 col-sm-12 offset-md-9 text-center">
-                            <a asp-action="Details" class="btn btn-success form-control" asp-route-id="@item.Id" asp-controller="MenuItems" asp-area="Admin">Details</a>
+                            <a asp-action="Detail" class="btn btn-success form-control" asp-route-id="@item.Id" asp-controller="Home" asp-area="Customer">Details</a>
                         </div>
                     </div>
                 </div>
             </div>
         }
-
-
         //Added some padding when each catgory is displayed
         <div class="p-2"></div>
     }
@@ -144,9 +142,6 @@
         $("a").click(function(){
     $("a").addClass("active");
   });
-     
-
-       
         $(document).ready(function(){
             $("#msgid").html("This is Hello World  from JQuery");
         });

@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Spice.Data;
+using Spice.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Spice.Areas.Identity.Pages.Account
 {
@@ -17,11 +21,14 @@ namespace Spice.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
+        // Added Db Context so we can query database for user identity
+        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger, ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         [BindProperty]
@@ -76,6 +83,15 @@ namespace Spice.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
+
+                    // Once the user login succefuly we want to set the value of count in session in the shopping cart.
+                    //we need to read the database to know this.
+                    //Make sure to use enityty frame work otherwise asych would not work
+                    var user =  await _context.Users.Where(u => u.Email == Input.Email).FirstOrDefaultAsync();
+
+                   // List<ShoppingCart> lstShoppingCart = await _context.shoppingCart.Where(u => u.AppliUserId == user.Id).ToListAsync();
+                    var count = await _context.shoppingCart.Where(u => u.AppliUserId == user.Id).CountAsync();
+                    HttpContext.Session.SetInt32(SC.sSsCartCount, count);
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }

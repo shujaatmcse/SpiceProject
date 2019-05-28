@@ -12,5 +12,6 @@ namespace Spice
         public const string KitchenRole = "KitchenRole";
         public const string FrontDeskRole = "FrontDeskRole";
         public const string CustomerRole = "CustomerRole";
+        public const string sSsCartCount = "sSCartCount";
     }
 }

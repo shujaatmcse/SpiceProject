@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Spice.Data;
 using Spice.Models;
 using Spice.ViewModel;
+using Microsoft.AspNetCore.Http;
+using Spice;
+using System.Security.Claims;
 
 namespace Spice.Controllers
 {
@@ -30,6 +33,17 @@ namespace Spice.Controllers
         //Reciving Category Id, Optional
         public async Task<IActionResult> Index( int ? Id)
         {
+            //Setting the Count Value in the shopping cart session varable on the on the home page.
+            // Getting the user Identiy  to know its User Id
+            var claimsIdentity = (ClaimsIdentity)this.User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null)
+            {
+                var cnt = _context.shoppingCart.Where(u => u.AppliUserId == claim.Value).ToList().Count;
+                HttpContext.Session.SetInt32(SC.sSsCartCount, cnt);
+            }
+
+
             LandingPageViewModel vm = new LandingPageViewModel();
             MenuItem menu = new MenuItem();
             //Id is received when a specific Category is selected.Its the category Id
@@ -58,9 +72,29 @@ namespace Spice.Controllers
                 //Note use the include where there is a relationship involove.
                 vm.MenuItem = await _context.MenuItem.Include(c => c.Category).Include(s => s.SubCategory).ToListAsync();
             }
+
+
+
             return View(vm);
         }
 
+
+        public async Task<IActionResult> Detail(int Id)
+        {
+            //Getting the MenuItem Selected by User
+            var menuItemInDb = await _context.MenuItem.Include(m => m.Category).Include(s => s.SubCategory).Where(i => i.Id == Id).FirstOrDefaultAsync();
+            //Creating the shopping cart Object.
+            ShoppingCart shoppingCart = new ShoppingCart()
+            {
+                menuItem = menuItemInDb,
+                MenuItemId = menuItemInDb.Id
+            };
+
+            return View(shoppingCart);
+            
+        }
+
+       
         public IActionResult Privacy()
         {
             return View();
