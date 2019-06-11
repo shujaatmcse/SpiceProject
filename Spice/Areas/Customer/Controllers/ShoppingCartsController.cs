@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Spice.Data;
 using Spice.Models;
+using Spice.ViewModel;
 
 namespace Spice.Areas.Customer.Controllers
 {
@@ -24,10 +25,40 @@ namespace Spice.Areas.Customer.Controllers
         }
 
         // GET: Customer/ShoppingCarts
+        // Geting the shopping cart items.
         public async Task<IActionResult> Index()
         {
-            var cart = await _context.shoppingCart.ToListAsync();
-            return View(cart);
+            // order header object is created, we need to iterate through the list of menuItem and add the prices to orderHeader.
+            OrderHeader orderHeader = new OrderHeader();
+            // Initialized order total to Zero.
+            orderHeader.OrderTotal = 0;
+
+            // Getting the user Identiy  to know its User Id
+            var claimsIdentity = (ClaimsIdentity)this.User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            // Retreiving cartfrom Db which is added by this user
+            var cart = await _context.shoppingCart.Include(m=>m.menuItem).Where(c => c.AppliUserId == claim.Value).ToListAsync();
+            
+            if (cart != null)
+            {
+                // Adding the Order Total 
+                foreach (var item in cart)
+                {
+                    orderHeader.OrderTotal = orderHeader.OrderTotal + item.menuItem.Price * item.Count;
+                }
+
+                OrderHeaderShoppingCartViewModel detailCart = new OrderHeaderShoppingCartViewModel()
+                {
+                    ShoppingCart = cart,
+                    OrderHeader = orderHeader
+                };
+
+                // At this time coupon code is not yet applied
+                return View(detailCart);
+            }
+
+            return View();
      
         }
 

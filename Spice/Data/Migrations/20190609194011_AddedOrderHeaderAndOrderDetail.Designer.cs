@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Spice.Data;
 
 namespace Spice.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190609194011_AddedOrderHeaderAndOrderDetail")]
+    partial class AddedOrderHeaderAndOrderDetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,7 +271,7 @@ namespace Spice.Data.Migrations
 
                     b.Property<int>("OrderId");
 
-                    b.Property<decimal>("Price");
+                    b.Property<double>("Price");
 
                     b.HasKey("Id");
 
@@ -294,7 +296,7 @@ namespace Spice.Data.Migrations
 
                     b.Property<string>("CouponCodeDiscount");
 
-                    b.Property<decimal>("OrderTotal");
+                    b.Property<double>("OrderTotal");
 
                     b.Property<decimal>("OrignalTotal");
 
@@ -330,8 +332,6 @@ namespace Spice.Data.Migrations
                     b.Property<int>("MenuItemId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MenuItemId");
 
                     b.ToTable("shoppingCart");
                 });
@@ -444,14 +444,6 @@ namespace Spice.Data.Migrations
                     b.HasOne("Spice.Models.ApplicationUser", "applicationUser")
                         .WithMany()
                         .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("Spice.Models.ShoppingCart", b =>
-                {
-                    b.HasOne("Spice.Models.MenuItem", "menuItem")
-                        .WithMany()
-                        .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Spice.Models.SubCategory", b =>
