@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -28,8 +29,15 @@ namespace Spice.Areas.Customer.Controllers
         // Geting the shopping cart items.
         public async Task<IActionResult> Index()
         {
-            // order header object is created, we need to iterate through the list of menuItem and add the prices to orderHeader.
+            // Creating an object of Orderheader and initializing it to zero, becouase 
+            // we will be adding OrderHeader.OrderTotal previous value to a new value. so if no previous value then it will give error
             OrderHeader orderHeader = new OrderHeader();
+           // Initialized to zero, to avoid error
+            orderHeader.OrderTotal = 0;
+            OrderHeaderShoppingCartViewModel detailCart = new OrderHeaderShoppingCartViewModel()
+            {
+                OrderHeader= orderHeader 
+            };
             // Initialized order total to Zero.
             orderHeader.OrderTotal = 0;
 
@@ -38,28 +46,36 @@ namespace Spice.Areas.Customer.Controllers
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
             // Retreiving cartfrom Db which is added by this user
-            var cart = await _context.shoppingCart.Include(m=>m.menuItem).Where(c => c.AppliUserId == claim.Value).ToListAsync();
-            
-            if (cart != null)
+            // and assiging it to the detailCard Shopping cart List
+             detailCart.ShoppingCart = await _context.shoppingCart.Where(c => c.AppliUserId == claim.Value).ToListAsync();
+            if (detailCart.ShoppingCart != null)
             {
                 // Adding the Order Total 
-                foreach (var item in cart)
+                // And since the Menu Item is not mapped we can not use the Include statement above and will not be able to navigate to
+                // Include Menu Item so we have to assign manually MenuItem object to the detailCart.Shopping Cart List
+                // We know we have the menu Item Id so we will  get Menu Item Object for each of that Id and we also have MenuItem Object
+                // but we cannot not navigate through it.
+                foreach (var item in detailCart.ShoppingCart)
                 {
-                    orderHeader.OrderTotal = orderHeader.OrderTotal + item.menuItem.Price * item.Count;
+                    //since we have not mappped the menuItem we have to manually add each MenuItem details to the Shopping cart list object
+                    // Creating the Menu Item object
+                     var menuItem = await _context.MenuItem.Where(m => m.Id == item.MenuItemId).FirstAsync();
+                    // Important thing to note he is that we are change the menuItem itself through for each loop.
+                    // Assigning and changing the MenuItem
+                    item.menuItem = menuItem;
+                    // now adding details of menu Item.
+                     detailCart.OrderHeader.OrderTotal = detailCart.OrderHeader.OrderTotal + item.menuItem.Price * item.Count;  
                 }
-
-                OrderHeaderShoppingCartViewModel detailCart = new OrderHeaderShoppingCartViewModel()
-                {
-                    ShoppingCart = cart,
-                    OrderHeader = orderHeader
-                };
-
                 // At this time coupon code is not yet applied
                 return View(detailCart);
             }
 
             return View();
      
+        // You may be thinking why we are not mapping the MenuItem  to advoid the manual addition.
+        // You can do that but then when you want to add menu Item to the List, it will give error since the incoming Object will 
+        // not have Id of Category or subcategory. If you map it, then the only solution may be to retriview the MenuItem Object for that Id
+        // and then add that object to Database.
         }
 
         // GET: Customer/ShoppingCarts/Details/5
